@@ -10,8 +10,8 @@ const nunito = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Project Report | Taruna Anugrah Mandiri",
-  description: "We are a group of students from Taruna Anugrah Mandiri",
+  title: "WI-LAB",
+  description: "Platform Inovasi ASN untuk WiraIswara dan Trainee",
 };
 
 export default function RootLayout({

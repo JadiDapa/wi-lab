@@ -17,9 +17,7 @@ export interface ModuleType extends CreateModuleType {
   updatedAt: Date;
 }
 
-enum ModuleVisibility {
+export enum ModuleVisibility {
   OPEN,
-  RESTRICTED
+  RESTRICTED,
 }
-
-

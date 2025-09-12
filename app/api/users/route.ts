@@ -8,6 +8,9 @@ export async function GET() {
       orderBy: {
         id: "desc",
       },
+      include: {
+        teacher: true,
+      },
     });
 
     return NextResponse.json(result, { status: 200 });

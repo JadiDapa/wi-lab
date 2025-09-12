@@ -1,23 +1,21 @@
-
 export interface CreateNotificationType {
-  userId: string,
+  userId: string;
   title: string;
   content?: string;
-  notificationType: NotificationType;
+  notificationType: Notification;
   read?: boolean;
 }
 
-export interface UserType extends CreateNotificationType {
+export interface NotificationType extends CreateNotificationType {
   id: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export enum NotificationType {
+export enum Notification {
   ASSIGNMENT,
   MESSAGES,
   ANNOUNCEMENT,
   MODULE_UPDATE,
-  OTHER
+  OTHER,
 }
-

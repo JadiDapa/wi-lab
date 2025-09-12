@@ -21,13 +21,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-
 const registerSchema = z.object({
   email: z.string().min(1, "Email is required"),
   password: z.string().min(1, "Password is required"),
 });
 
-export default function LoginForm() {
+export default function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -54,7 +53,8 @@ export default function LoginForm() {
       if (result.status === "complete" && result.createdSessionId) {
         await setActive({ session: result.createdSessionId });
         toast.success("Login Successful!");
-        router.push("/");
+
+        router.push("/dashboard");
       } else {
         toast.error("Invalid Email or Password!");
       }
@@ -130,7 +130,7 @@ export default function LoginForm() {
           {isLoading ? (
             <>
               Submitting
-              <LoaderCircle className="h-6 w-6 animate-spin text-gray-500" />;
+              <LoaderCircle className="h-6 w-6 animate-spin text-gray-500" />
             </>
           ) : (
             "Login"

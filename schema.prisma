@@ -8,23 +8,32 @@ datasource db {
 }
 
 model User {
-  id               String         @id @default(uuid())
-  email            String         @unique
-  emailVerified    DateTime?
-  fullName         String
-  role             Role           @default(STUDENT)
+  id            String    @id @default(uuid())
+  email         String    @unique
+  emailVerified DateTime?
+  fullName      String
+  role          Role      @default(STUDENT)
+
   // optional identification fields
-  nim              String? // untuk mahasiswa
-  nip              String? // untuk dosen/widyaiswara
-  department       String? // jurusan / unit
-  bio              String?
-  avatarUrl        String?
+  nim        String?
+  nip        String?
+  department String?
+  bio        String?
+  avatarUrl  String?
+
+  isConversationLocked Boolean   @default(false)
+  nextOpenTime         DateTime?
+
   // relations
-  modules          Module[]       @relation("author_modules")
-  moduleFiles      ModuleFile[]   @relation("uploader_module_files")
-  notifications    Notification[]
-  sentMessages     Message[]      @relation("message_sender")
-  receivedMessages Message[]      @relation("message_recipient")
+  teacher   User?   @relation("TeacherStudents", fields: [teacherId], references: [id])
+  teacherId String?
+  students  User[]  @relation("TeacherStudents")
+
+  modules       Module[]       @relation("author_modules")
+  moduleFiles   ModuleFile[]   @relation("uploader_module_files")
+  notifications Notification[]
+  conversations Conversation[] @relation("conversation_users")
+  messages      Message[]      @relation("user_messages")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,7 +45,6 @@ model Module {
   slug        String           @unique
   description String?
   visibility  ModuleVisibility @default(OPEN)
-  // tags        String[]         @default([])
   author      User             @relation("author_modules", fields: [authorId], references: [id])
   authorId    String
   files       ModuleFile[]
@@ -52,30 +60,41 @@ model ModuleFile {
   moduleId     String
   url          String
   filename     String
-  uploadedBy   User?    @relation("uploader_module_files", fields: [uploadedById], references: [id])
   uploadedById String?
+  uploadedBy   User?    @relation("uploader_module_files", fields: [uploadedById], references: [id])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@index([moduleId])
 }
 
-model Message {
-  id          String             @id @default(uuid())
-  sender      User               @relation("message_sender", fields: [senderId], references: [id])
-  senderId    String
-  recipient   User               @relation("message_recipient", fields: [recipientId], references: [id])
-  recipientId String
-  content     String?
-  contentType MessageContentType @default(TEXT)
-  attachment  String?
-  readAt      DateTime? // null = belum dibaca
-  edited      Boolean            @default(false)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+model Conversation {
+  id       String    @id @default(uuid())
+  users    User[]    @relation("conversation_users")
+  messages Message[]
 
-  @@index([senderId, recipientId, createdAt])
-  @@index([recipientId, readAt])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id             String             @id @default(uuid())
+  conversation   Conversation       @relation(fields: [conversationId], references: [id])
+  conversationId String
+  sender         User               @relation("user_messages", fields: [senderId], references: [id])
+  senderId       String
+  content        String?
+  contentType    MessageContentType @default(TEXT)
+  attachment     String?
+  readAt         DateTime? // null = belum dibaca
+  edited         Boolean            @default(false)
+  deleted        Boolean            @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId, createdAt])
+  @@index([senderId, createdAt])
 }
 
 model Notification {

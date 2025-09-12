@@ -10,7 +10,16 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { DevTool } from "@hookform/devtools";
 
-import { Eye, EyeClosed, LoaderCircle, Lock, Mail, User } from "lucide-react";
+import {
+  Eye,
+  EyeClosed,
+  LoaderCircle,
+  Lock,
+  Mail,
+  User,
+  IdCard,
+  BookOpen,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,16 +36,33 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+
+import { useMutation } from "@tanstack/react-query";
 import { createUser } from "@/lib/networks/user";
 import { CreateUserType, Role } from "@/lib/types/user";
 
 // Validation schema
-const signupSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+const signupSchema = z
+  .object({
+    fullname: z.string().min(3, "Name must be at least 3 characters"),
+    role: z.enum(["STUDENT", "TEACHER"] as [string, ...string[]]),
+    nimOrNip: z.string().min(3, "NIM/NIP must be at least 3 characters"),
+    department: z.string().min(2, "Department must be at least 2 characters"),
+    email: z.string().email("Invalid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
 
 const verifySchema = z.object({
   code: z.string().length(6, "Code must be 6 digits"),
@@ -46,8 +72,10 @@ export default function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
+  const [signupData, setSignupData] = useState<z.infer<
+    typeof signupSchema
+  > | null>(null);
 
-  const queryClient = useQueryClient();
   const { signUp, setActive, isLoaded } = useSignUp();
   const router = useRouter();
 
@@ -59,9 +87,13 @@ export default function SignUpForm() {
   const form = useForm({
     resolver: zodResolver(pendingVerification ? verifySchema : signupSchema),
     defaultValues: {
-      username: "",
+      fullname: "",
+      role: "STUDENT",
+      nimOrNip: "",
+      department: "",
       email: "",
       password: "",
+      confirmPassword: "",
       code: "",
     },
   });
@@ -72,18 +104,16 @@ export default function SignUpForm() {
     setIsLoading(true);
 
     try {
+      setSignupData(values); // save for later
+
       await signUp.create({
-        username: values.username,
         emailAddress: values.email,
         password: values.password,
       });
 
-      // Send verification code
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
-
-      // ✅ Reset form so "code" field starts empty
-      form.reset({ code: "" });
+      form.setValue("code", "");
 
       toast.info("Verification code sent to your email.");
     } catch (error: any) {
@@ -95,7 +125,6 @@ export default function SignUpForm() {
   }
 
   // Step 2: Verify email
-  // Step 2: Verify email
   async function onVerify(values: z.infer<typeof verifySchema>) {
     if (!isLoaded) return;
     setIsLoading(true);
@@ -106,20 +135,23 @@ export default function SignUpForm() {
       });
 
       if (result.status === "complete" && result.createdSessionId) {
-        // ✅ Set Clerk active session
         await setActive({ session: result.createdSessionId });
 
-        // ✅ Create user in your own database
         await createUserAsync({
-          fullName: signUp.username!,
+          fullName: signupData?.fullname ?? "",
+          nim:
+            signupData?.role === "STUDENT" ? signupData?.nimOrNip : undefined,
+          nip:
+            signupData?.role === "TEACHER" ? signupData?.nimOrNip : undefined,
+          department: signupData?.department ?? "",
           email: signUp.emailAddress!,
-          role: "STUDENT" as unknown as Role,
+          role: signupData?.role as Role,
         });
 
         toast.success("Account created successfully!");
         router.push("/");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Verification error:", error);
       toast.error(error.errors?.[0]?.message || "Invalid code.");
     } finally {
@@ -127,7 +159,6 @@ export default function SignUpForm() {
     }
   }
 
-  // Unified submit handler
   async function handleFormSubmit(
     values: z.infer<typeof signupSchema> | z.infer<typeof verifySchema>,
   ) {
@@ -138,6 +169,8 @@ export default function SignUpForm() {
     }
   }
 
+  const selectedRole = form.watch("role");
+
   return (
     <Form {...form}>
       <form
@@ -147,24 +180,87 @@ export default function SignUpForm() {
         <div className="space-y-4">
           {!pendingVerification ? (
             <>
-              {/* Username */}
+              {/* Full Name */}
               <FormField
                 control={form.control}
-                name="username"
+                name="fullname"
                 render={({ field }) => (
                   <FormItem className="relative">
-                    <User
-                      size={24}
-                      className="text-primary absolute top-1/2 left-3 -translate-y-1/2"
-                    />
+                    <User className="text-primary absolute top-1/2 left-3 -translate-y-1/2" />
                     <FormControl>
                       <Input
-                        className="border-primary h-10 w-full rounded-lg border-2 ps-12 lg:h-12"
-                        placeholder="Username"
+                        placeholder="Full Name"
+                        className="ps-12"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-start" />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-3">
+                {/* Role */}
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem className="">
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-[150px]">
+                            <SelectValue placeholder="Select Role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="STUDENT">Student</SelectItem>
+                            <SelectItem value="TEACHER">Teacher</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* NIM or NIP */}
+                <FormField
+                  control={form.control}
+                  name="nimOrNip"
+                  render={({ field }) => (
+                    <FormItem className="relative flex-1">
+                      <IdCard className="text-primary absolute top-1/2 left-3 -translate-y-1/2" />
+                      <FormControl>
+                        <Input
+                          placeholder={
+                            selectedRole === "TEACHER" ? "NIP" : "NIM"
+                          }
+                          className="ps-12"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Department */}
+              <FormField
+                control={form.control}
+                name="department"
+                render={({ field }) => (
+                  <FormItem className="relative">
+                    <BookOpen className="text-primary absolute top-1/2 left-3 -translate-y-1/2" />
+                    <FormControl>
+                      <Input
+                        placeholder="Department"
+                        className="ps-12"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -175,18 +271,11 @@ export default function SignUpForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem className="relative">
-                    <Mail
-                      size={24}
-                      className="text-primary absolute top-1/2 left-3 -translate-y-1/2"
-                    />
+                    <Mail className="text-primary absolute top-1/2 left-3 -translate-y-1/2" />
                     <FormControl>
-                      <Input
-                        className="border-primary h-10 w-full rounded-lg border-2 ps-12 lg:h-12"
-                        placeholder="Email"
-                        {...field}
-                      />
+                      <Input placeholder="Email" className="ps-12" {...field} />
                     </FormControl>
-                    <FormMessage className="text-start" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -197,25 +286,47 @@ export default function SignUpForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem className="relative">
-                    <Lock
-                      size={24}
-                      className="text-primary absolute top-1/2 left-3 -translate-y-1/2"
-                    />
+                    <Lock className="text-primary absolute top-1/2 left-3 -translate-y-1/2" />
                     <div
                       onClick={() => setIsVisible(!isVisible)}
                       className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
                     >
-                      {isVisible ? <Eye size={24} /> : <EyeClosed size={24} />}
+                      {isVisible ? <Eye /> : <EyeClosed />}
                     </div>
                     <FormControl>
                       <Input
-                        className="border-primary h-10 w-full rounded-lg border-2 ps-12 lg:h-12"
-                        placeholder="Password"
                         type={isVisible ? "text" : "password"}
+                        placeholder="Password"
+                        className="ps-12"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-start" />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Confirm Password */}
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem className="relative">
+                    <Lock className="text-primary absolute top-1/2 left-3 -translate-y-1/2" />
+                    <div
+                      onClick={() => setIsVisible(!isVisible)}
+                      className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
+                    >
+                      {isVisible ? <Eye /> : <EyeClosed />}
+                    </div>
+                    <FormControl>
+                      <Input
+                        type={isVisible ? "text" : "password"}
+                        placeholder="Confirm Password"
+                        className="ps-12"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -230,7 +341,7 @@ export default function SignUpForm() {
                     <InputOTP
                       maxLength={6}
                       value={field.value}
-                      onChange={(value) => field.onChange(value)} // 👈 FIX
+                      onChange={(value) => field.onChange(value)}
                     >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
@@ -245,18 +356,19 @@ export default function SignUpForm() {
                       </InputOTPGroup>
                     </InputOTP>
                   </FormControl>
-                  <FormMessage className="text-start" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
           )}
         </div>
+
         <div id="clerk-captcha"></div>
 
         <Button
           disabled={isLoading}
           type="submit"
-          className="mt-6 flex h-10 w-full cursor-pointer items-center gap-3 text-lg lg:mt-10 lg:h-12"
+          className="mt-6 flex w-full items-center justify-center gap-3"
         >
           {isLoading ? (
             <>

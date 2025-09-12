@@ -6,6 +6,13 @@ export async function getAllModules() {
   return data;
 }
 
+export async function getModulesByAccountId(accountId: string) {
+  const { data } = await axiosInstance.get<ModuleType[]>(
+    "/modules/accounts/" + accountId,
+  );
+  return data;
+}
+
 export async function getModuleById(id: string) {
   const { data } = await axiosInstance.get<ModuleType>("/modules/" + id);
   return data;

@@ -9,7 +9,7 @@ export async function GET(
     const { id } = await params;
     const result = await prisma.moduleFile.findUnique({
       where: {
-        id: id,
+        id,
       },
     });
     return NextResponse.json(result, { status: 200 });
@@ -30,20 +30,14 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-
     const body = await req.json();
-
-    const { moduleId, filename, url, uploadedById } = body;
 
     const result = await prisma.moduleFile.update({
       where: {
-        id: id,
+        id,
       },
       data: {
-        moduleId: moduleId,
-        filename: filename,
-        url: url,
-        uploadedById: uploadedById,
+        ...body,
       },
     });
 
@@ -67,7 +61,7 @@ export async function DELETE(
     const { id } = await params;
     const result = await prisma.moduleFile.delete({
       where: {
-        id: id,
+        id,
       },
     });
     return NextResponse.json(result, { status: 200 });

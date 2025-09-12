@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { NotificationType } from "@prisma/client";
 
 export async function GET(
   request: Request,
@@ -8,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const result = await prisma.notification.findUnique({
+    const result = await prisma.user.findUnique({
       where: {
         id: id,
       },
@@ -31,27 +30,23 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-
     const body = await req.json();
 
-    const { userId, title, content, notificationType } = body;
-
-    const result = await prisma.notification.update({
+    const result = await prisma.user.update({
       where: {
         id: id,
       },
-      data: {
-        userId,
-        title,
-        content: content ?? "",
-        notificationType: notificationType as NotificationType,
+      data: body,
+      include: {
+        teacher: true, // ✅ return teacher if updating a student
+        students: true, // ✅ return students if updating a teacher
       },
     });
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     if (error instanceof Error) {
-      console.log("Error: ", error.stack);
+      console.error("Error: ", error.stack);
     }
     return NextResponse.json(
       { message: "Something went wrong!", error },
@@ -66,7 +61,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const result = await prisma.notification.delete({
+    const result = await prisma.user.delete({
       where: {
         id: id,
       },

@@ -3,22 +3,32 @@ import { prisma } from "@/lib/prisma";
 import { MessageContentType } from "@prisma/client";
 import { fileUpload } from "@/lib/file-upload";
 
+declare global {
+  var io: import("socket.io").Server;
+}
+
+// GET single message by id
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
+
     const result = await prisma.message.findUnique({
-      where: {
-        id: id,
+      where: { id },
+      include: {
+        sender: { select: { id: true, fullName: true, avatarUrl: true } },
+        conversation: {
+          select: {
+            users: { select: { id: true, fullName: true, avatarUrl: true } },
+          },
+        },
       },
     });
+
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    if (error instanceof Error) {
-      console.log("Error: ", error.stack);
-    }
     return NextResponse.json(
       { message: "Something went wrong!", error },
       { status: 500 },
@@ -26,49 +36,43 @@ export async function GET(
   }
 }
 
+// UPDATE (edit) a message
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await params;
-
+    const { id } = params;
     const formData = await req.formData();
 
-    const senderId = formData.get("senderId") as string;
-    const recipientId = formData.get("recipientId") as string;
-    const content = formData.get("content") as string;
+    const content = formData.get("content") as string | null;
     const contentType = formData.get("contentType") as string;
     const attachment = formData.get("attachment") as File | null;
-    const readAt = formData.get("readAt") as string | null;
-    const edited = formData.get("edited") === "true";
 
     let filePath: string | null = null;
-
     if (attachment && attachment.name) {
       const filename = await fileUpload(attachment, "uploads");
-      filePath = `${process.env.NEXT_PUBLIC_BASE_URL}/api/images/${filename}`;
+      filePath = `${process.env.NEXT_PUBLIC_BASE_URL}/api/uploads/${filename}`;
     }
 
-    const result = await prisma.message.update({
-      where: {
-        id: id,
-      },
+    const updated = await prisma.message.update({
+      where: { id },
       data: {
-        senderId,
-        recipientId,
         content,
         contentType: contentType as MessageContentType,
         attachment: filePath ?? null,
-        readAt: readAt ?? null,
-        edited: edited ?? false,
+        edited: true,
+      },
+      include: {
+        sender: { select: { id: true, fullName: true, avatarUrl: true } },
+        conversation: true,
       },
     });
-    return NextResponse.json(result, { status: 201 });
+
+    global.io?.to(updated.conversationId).emit("message_edited", updated);
+
+    return NextResponse.json(updated, { status: 200 });
   } catch (error) {
-    if (error instanceof Error) {
-      console.log("Error: ", error.stack);
-    }
     return NextResponse.json(
       { message: "Something went wrong!", error },
       { status: 500 },
@@ -76,22 +80,29 @@ export async function PUT(
   }
 }
 
+// DELETE (soft delete)
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await params;
-    const result = await prisma.message.delete({
-      where: {
-        id: id,
+    const { id } = params;
+
+    const deleted = await prisma.message.update({
+      where: { id },
+      data: { deleted: true },
+      include: {
+        conversation: true,
       },
     });
-    return NextResponse.json(result, { status: 200 });
+
+    global.io?.to(deleted.conversationId).emit("message_deleted", deleted.id);
+
+    return NextResponse.json(
+      { success: true, id: deleted.id },
+      { status: 200 },
+    );
   } catch (error) {
-    if (error instanceof Error) {
-      console.log("Error: ", error.stack);
-    }
     return NextResponse.json(
       { message: "Something went wrong!", error },
       { status: 500 },

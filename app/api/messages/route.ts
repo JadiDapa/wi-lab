@@ -6,8 +6,9 @@ import { MessageContentType } from "@prisma/client";
 export async function GET() {
   try {
     const result = await prisma.message.findMany({
-      orderBy: {
-        id: "desc",
+      orderBy: { createdAt: "desc" },
+      include: {
+        sender: { select: { id: true, fullName: true, avatarUrl: true } },
       },
     });
 
@@ -25,31 +26,40 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
 
     const senderId = formData.get("senderId") as string;
-    const recipientId = formData.get("recipientId") as string;
+    const conversationId = formData.get("conversationId") as string;
+    const contentType = formData.get("contentType") as MessageContentType;
     const content = formData.get("content") as string;
-    const contentType = formData.get("contentType") as string;
-    const attachment = formData.get("attachment") as File | null;
-    const readAt = formData.get("readAt") as string | null;
 
-    let filePath: string | null = null;
+    let attachment: string | null = null;
 
-    if (attachment && attachment.name) {
-      const filename = await fileUpload(attachment, "uploads");
-      filePath = `${process.env.NEXT_PUBLIC_BASE_URL}/api/images/${filename}`;
+    // Handle FILE or IMAGE
+    const file = formData.get("attachment");
+    if (file instanceof File) {
+      const filename = await fileUpload(file, "uploads");
+      attachment = `${process.env.NEXT_PUBLIC_BASE_URL}/api/uploads/${filename}`;
     }
 
-    const result = await prisma.message.create({
+    const message = await prisma.message.create({
       data: {
         senderId,
-        recipientId,
+        conversationId,
         content,
-        contentType: contentType as MessageContentType,
-        attachment: filePath ?? null,
-        readAt: readAt ?? null,
+        contentType,
+        attachment,
+      },
+      include: {
+        sender: { select: { id: true, fullName: true, avatarUrl: true } },
       },
     });
 
-    return NextResponse.json(result, { status: 201 });
+    // Emit via socket.io
+    if (globalThis.io) {
+      globalThis.io.to(conversationId).emit("message", message);
+    } else {
+      console.warn("No global io instance available to emit message");
+    }
+
+    return NextResponse.json(message, { status: 201 });
   } catch (error) {
     console.error("Error: ", error);
     return NextResponse.json(
