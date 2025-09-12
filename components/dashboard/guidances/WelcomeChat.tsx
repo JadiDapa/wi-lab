@@ -3,7 +3,7 @@ import React from "react";
 
 export default function WelcomeChat() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center">
+    <div className="hidden flex-1 flex-col items-center justify-center lg:flex">
       <div className="">
         <MessagesSquare className="text-foreground size-40" />
       </div>

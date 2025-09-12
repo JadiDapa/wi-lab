@@ -68,7 +68,7 @@ export default function ModuleFiles({ module }: { module: ModuleType }) {
   };
 
   return (
-    <section id="modules" className="flex-1 border-l px-6">
+    <section id="modules" className="flex-1 px-6 lg:border-l">
       <div className="flex items-center justify-between py-2">
         <p className="text-lg font-semibold">Module Files</p>
 
@@ -92,7 +92,7 @@ export default function ModuleFiles({ module }: { module: ModuleType }) {
           )}
         </div>
       </div>
-      <Separator />
+      <Separator className="" />
 
       <div className="mt-2">
         <p className="text-sm font-medium">Readings</p>

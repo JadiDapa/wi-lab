@@ -23,7 +23,7 @@ export default function CreateModule() {
   });
 
   return (
-    <section className="p-6">
+    <section className="p-3 lg:p-6">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="">
@@ -42,7 +42,7 @@ export default function CreateModule() {
           )}
         </div>
 
-        <div className="grid w-full grid-cols-3 gap-6">
+        <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {modules?.map((mod) => (
             <Link key={mod.id} href={`/dashboard/modules/${mod.id}`}>
               <ModuleCard key={mod.id} module={mod} />

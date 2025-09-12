@@ -7,6 +7,7 @@ import { useClerk } from "@clerk/nextjs";
 import Image from "next/image";
 import { useAccount } from "@/providers/AccountProvider";
 import SearchDialog from "./SearchDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export default function DashboardNavbar() {
   const { account } = useAccount();
@@ -27,14 +28,16 @@ export default function DashboardNavbar() {
           size={24}
         />
         <Notifications />
-        <figure className="border-primary relative size-[44px] overflow-hidden rounded-full border">
-          <Image
-            src="https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D"
-            alt="Logo"
-            fill
-            className="object-cover object-center"
-          />
-        </figure>
+        <Avatar className="size-12">
+          <AvatarImage src={account.avatarUrl || ""} alt={account.fullName} />
+          <AvatarFallback>
+            {account.fullName
+              .split(" ")
+              .map((n) => n[0])
+              .slice(0, 2)
+              .join("")}
+          </AvatarFallback>
+        </Avatar>
         <div className="">
           <p> {account?.fullName} </p>
           <p className="text-sm text-slate-500">{account?.department}</p>

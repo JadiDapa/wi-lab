@@ -81,6 +81,11 @@ export default function AddStudentsPage() {
             />
             <SearchDataTable
               table={table}
+              column="nim"
+              placeholder="Search NIM..."
+            />
+            <SearchDataTable
+              table={table}
               column="department"
               placeholder="Search Department..."
             />

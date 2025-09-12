@@ -19,6 +19,9 @@ export async function GET(
         },
         files: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

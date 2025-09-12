@@ -17,7 +17,7 @@ export default function ModuleInfo({ module, gradient }: ModuleInfoType) {
   const { account } = useAccount();
 
   return (
-    <section id="content" className="w-full flex-3 px-6">
+    <section id="content" className="w-full flex-3 lg:px-6">
       {/* Header / Thumbnail */}
       <div className="relative">
         <div

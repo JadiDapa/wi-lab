@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const result = await prisma.module.findMany({
       orderBy: {
-        id: "desc",
+        createdAt: "desc",
       },
     });
 

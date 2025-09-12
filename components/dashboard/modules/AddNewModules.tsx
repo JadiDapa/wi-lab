@@ -138,7 +138,7 @@ export function AddNewModules({ children }: { children: React.ReactNode }) {
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent
         side="right"
-        className="flex h-screen flex-col p-6 lg:max-w-lg"
+        className="flex h-screen w-full flex-col p-6 lg:max-w-lg"
       >
         <Form {...form}>
           <form

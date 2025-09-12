@@ -44,7 +44,7 @@ export default function ModuleDetail() {
   if (!module) return null;
 
   return (
-    <section className="flex p-6">
+    <section className="flex flex-col p-3 lg:flex-row lg:p-6">
       <ModuleInfo module={module} gradient={gradientClass} />
       <ModuleFiles module={module} />
     </section>

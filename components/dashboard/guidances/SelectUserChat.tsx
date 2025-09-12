@@ -8,7 +8,7 @@ import {
   updateUser,
 } from "@/lib/networks/user";
 import { useAccount } from "@/providers/AccountProvider";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createConversation } from "@/lib/networks/conversation";
 import { ConversationType } from "@/lib/types/conversation";
 import { Role, UserType } from "@/lib/types/user";
@@ -34,6 +34,8 @@ import "react-datepicker/dist/react-datepicker.css";
 export default function SelectUserChat() {
   const [nextOpen, setNextOpen] = useState<Date | undefined>(undefined);
 
+  const pathname = usePathname();
+
   const [activeTab, setActiveTab] = useState("inbox");
   const { account } = useAccount();
   const queryClient = useQueryClient();
@@ -48,11 +50,6 @@ export default function SelectUserChat() {
       );
     }
   }, [account]);
-
-  // derive locked state dynamically
-  const isLocked = account?.nextOpenTime
-    ? new Date(account.nextOpenTime) > new Date()
-    : false;
 
   const { data: teacher } = useQuery({
     queryKey: ["teacher", account?.teacherId],
@@ -97,8 +94,12 @@ export default function SelectUserChat() {
     });
   };
 
+  const isChatRoom = pathname.startsWith("/dashboard/guidances/");
+
   return (
-    <div className="flex h-[90vh] max-w-sm flex-col border-r bg-white">
+    <div
+      className={`flex h-[90vh] w-full flex-col border-r bg-white lg:max-w-sm ${isChatRoom && "max-lg:hidden"}`}
+    >
       <ChatHeader
         activeTab={activeTab}
         setActiveTab={setActiveTab}
