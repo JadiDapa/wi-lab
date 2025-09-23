@@ -1,5 +1,5 @@
 import Navbar from "@/components/root/Navbar";
-import Footer from "@/components/root/Footer";
+// import Footer from "@/components/root/Footer";
 import { ReactNode } from "react";
 
 type Props = {
@@ -10,7 +10,7 @@ export default function RootLayout({ children }: Props) {
     <section className="bg-background text-foreground overflow-hidden">
       <Navbar />
       <div className="">{children}</div>
-      <Footer />
+      {/* <Footer /> */}
     </section>
   );
 }

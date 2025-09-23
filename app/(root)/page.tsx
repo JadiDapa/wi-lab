@@ -34,14 +34,14 @@ export default function Hero() {
 
             {/* Action buttons */}
             <div className="flex justify-center gap-4 lg:justify-normal lg:gap-6">
-              <a
+              {/* <a
                 href="https://expo.dev/artifacts/eas/ouKQ29pp7DZU5ZBXZZy8vh.apk"
                 download
                 className="bg-primary group border-primary hover:text-primary flex w-36 items-center justify-center gap-3 rounded-full border-2 py-2 text-white transition-all hover:bg-transparent lg:w-44"
               >
                 <Download className="group-hover:text-primary size-4 text-white lg:size-5" />
                 <span className="text-sm">Download App</span>
-              </a>
+              </a> */}
               <Link
                 href={"/login"}
                 className="border-primary group hover:bg-primary flex w-36 items-center justify-center gap-3 rounded-full border-2 bg-transparent py-2 transition-all lg:w-44"

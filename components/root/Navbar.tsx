@@ -34,15 +34,14 @@ export default function Navbar() {
           href="#"
           className="font-medium text-gray-600 transition-colors hover:text-gray-900"
         >
+          About
+        </Link>
+        <Link
+          href="#"
+          className="font-medium text-gray-600 transition-colors hover:text-gray-900"
+        >
           Contact
         </Link>
-        <a
-          href="https://expo.dev/artifacts/eas/ouKQ29pp7DZU5ZBXZZy8vh.apk"
-          download
-          className="font-medium text-blue-500 transition-colors hover:text-blue-600"
-        >
-          Download App
-        </a>
       </nav>
 
       {account ? (
