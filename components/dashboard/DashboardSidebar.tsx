@@ -102,13 +102,18 @@ export default function DashboardSidebar() {
       <SidebarContent className="flex h-screen flex-col">
         {/* Logo + Overview + Students */}
         <div className="flex flex-1 flex-col overflow-y-auto">
-          <div className="relative mx-auto h-24 w-38 shrink-0">
-            <Image
-              src="/images/icon.png"
-              alt="Logo WI-LAB"
-              fill
-              className="object-contain object-center"
-            />
+          <div className="flex items-center justify-center gap-3 py-3">
+            <div className="relative size-10 lg:size-12">
+              <Image
+                src="/images/icon.png"
+                alt="logo"
+                fill
+                className="object-contain object-center"
+              />
+            </div>
+            <div className="text-primary text-3xl font-semibold tracking-wide">
+              <p style={{ textShadow: "3px 3px 1px #38bdf8" }}>WI-LAB</p>
+            </div>
           </div>
 
           {/* Overview */}

@@ -8,13 +8,18 @@ interface AuthHeaderProps {
 export default function AuthHeader({ title, subtitle }: AuthHeaderProps) {
   return (
     <div className="">
-      <div className="relative mx-auto h-24 w-64 px-6 py-2">
-        <Image
-          src="/images/icon.png"
-          alt="logo"
-          className="object-contain object-center"
-          fill
-        />
+      <div className="flex items-center justify-center gap-3">
+        <div className="relative size-8 lg:size-14">
+          <Image
+            src="/images/icon.png"
+            alt="logo"
+            fill
+            className="object-contain object-center"
+          />
+        </div>
+        <div className="text-primary text-4xl font-semibold tracking-wide">
+          <p style={{ textShadow: "3px 3px 1px #38bdf8" }}>WI-LAB</p>
+        </div>
       </div>
       <h1 className="text-primary mt-6 text-center text-3xl font-medium lg:text-5xl">
         {title}

@@ -9,13 +9,18 @@ export default function Navbar() {
 
   return (
     <header className="flex items-center justify-between from-blue-50 px-4 py-4 shadow-md lg:px-24">
-      <div className="relative h-10 w-20 lg:h-14 lg:w-24">
-        <Image
-          src="/images/icon.png"
-          alt="logo"
-          fill
-          className="object-contain object-center"
-        />
+      <div className="flex items-center gap-3">
+        <div className="relative size-8 lg:size-14">
+          <Image
+            src="/images/icon.png"
+            alt="logo"
+            fill
+            className="object-contain object-center"
+          />
+        </div>
+        <div className="text-primary text-4xl font-semibold tracking-wide">
+          <p style={{ textShadow: "3px 3px 1px #38bdf8" }}>WI-LAB</p>
+        </div>
       </div>
 
       <nav className="hidden items-center space-x-8 md:flex">
