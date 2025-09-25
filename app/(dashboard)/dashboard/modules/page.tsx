@@ -27,9 +27,10 @@ export default function CreateModule() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="">
-            <p className="text-2xl font-semibold">Modules</p>
+            <p className="text-2xl font-semibold">Modul Belajar</p>
             <p className="text-sm text-slate-500">
-              These are your modules for learning
+              Berikut adalah daftar modul dan materi pembelajaran yang dibagian
+              mentor mu!
             </p>
           </div>
           {account?.role === "LECTURER" && (

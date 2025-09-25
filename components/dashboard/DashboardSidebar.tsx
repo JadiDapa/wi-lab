@@ -4,10 +4,12 @@ import {
   Calendar,
   Home,
   Inbox,
+  Lightbulb,
   LogOut,
   Mailbox,
   MessageSquareText,
   Newspaper,
+  ScrollText,
   Search,
   Settings,
   Users,
@@ -31,45 +33,57 @@ import { getUserById, getUsersByTeacherId } from "@/lib/networks/user";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Role } from "@/lib/types/user";
 import { useClerk } from "@clerk/nextjs";
+import Link from "next/link";
 
 // Menu items.
 const overviewItems = [
   {
     title: "Dashboard",
-    url: "/",
+    url: "/dashboard",
     icon: Home,
     role: "all",
   },
   {
-    title: "Students",
-    url: "students",
+    title: "Peserta",
+    url: "/dashboard/students",
     icon: Users,
     role: "lecturer",
   },
   {
-    title: "Modules",
-    url: "modules",
+    title: "Widyaiswara",
+    url: "/dashboard/students",
+    icon: Users,
+    role: "lecturer",
+  },
+  {
+    title: "Coaching Clinic",
+    url: "/dashboard/guidances",
+    icon: MessageSquareText,
+    role: "all",
+  },
+  {
+    title: "Modul Belajar",
+    url: "/dashboard/modules",
     icon: Newspaper,
     role: "all",
   },
   {
-    title: "Guidances",
-    url: "guidances",
-    icon: MessageSquareText,
+    title: "Inovasi Peserta",
+    url: "/dashboard/inbox",
+    icon: Lightbulb,
     role: "all",
   },
-
   {
-    title: "Inbox",
-    url: "inbox",
-    icon: Mailbox,
+    title: "Jurnal",
+    url: "/dashboard/inbox",
+    icon: ScrollText,
     role: "all",
   },
 ];
 
 const settingsItems = [
   {
-    title: "Settings",
+    title: "Pengaturan",
     url: "#",
     icon: Settings,
   },
@@ -102,7 +116,7 @@ export default function DashboardSidebar() {
       <SidebarContent className="flex h-screen flex-col">
         {/* Logo + Overview + Students */}
         <div className="flex flex-1 flex-col overflow-y-auto">
-          <div className="flex items-center justify-center gap-3 py-3">
+          <div className="flex items-center justify-center gap-3 py-3 pt-4">
             <div className="relative size-10 lg:size-12">
               <Image
                 src="/images/icon.png"
@@ -117,13 +131,22 @@ export default function DashboardSidebar() {
           </div>
 
           {/* Overview */}
-          <SidebarGroup className="px-6 pt-0 pb-2">
-            <SidebarGroupLabel>OVERVIEW</SidebarGroupLabel>
+          <SidebarGroup className="px-6 pt-1 pb-2">
+            <SidebarGroupLabel>MENU</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {overviewItems.map((item) => {
-                  const url = `/dashboard/${item.url}`;
-                  const active = pathname.startsWith(url);
+                  const url = item.url;
+
+                  let active = false;
+
+                  if (url === "/dashboard") {
+                    // Only active if exactly on /dashboard
+                    active = pathname === url;
+                  } else {
+                    // Other menus: active if pathname matches or inside their sub-routes
+                    active = pathname === url || pathname.startsWith(`${url}/`);
+                  }
 
                   if (item.role === "lecturer" && userRole !== Role.LECTURER) {
                     return null;
@@ -132,9 +155,9 @@ export default function DashboardSidebar() {
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
-                        <a
+                        <Link
                           href={url}
-                          className={`flex items-center gap-x-4 gap-y-1 rounded-md px-2 py-1 transition-colors ${
+                          className={`flex h-9 items-center gap-x-4 gap-y-1 rounded-md px-2 py-1 transition-colors ${
                             active
                               ? "bg-primary text-white"
                               : "text-gray-700 hover:bg-gray-100"
@@ -142,7 +165,7 @@ export default function DashboardSidebar() {
                         >
                           <item.icon className="size-5" />
                           <span className="text-base">{item.title}</span>
-                        </a>
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
@@ -154,7 +177,7 @@ export default function DashboardSidebar() {
           {/* Students */}
           <SidebarGroup className="px-6 pt-0 pb-2">
             <SidebarGroupLabel>
-              {userRole === "LECTURER" ? "STUDENTS" : "LECTURER"}
+              {userRole === "LECTURER" ? "PESERTA" : "WIDYAISWARA"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               {userRole === "LECTURER" && (
@@ -217,7 +240,7 @@ export default function DashboardSidebar() {
 
         {/* SETTINGS pinned to bottom */}
         <SidebarGroup className="mt-auto shrink-0 px-6 pt-0 pb-6">
-          <SidebarGroupLabel>SETTINGS</SidebarGroupLabel>
+          {/* <SidebarGroupLabel>SETTINGS</SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item) => (
@@ -240,7 +263,7 @@ export default function DashboardSidebar() {
                     className="flex items-center gap-x-4 gap-y-1"
                   >
                     <LogOut className="size-5" />
-                    <span className="text-base">Log Out</span>
+                    <span className="text-base">Keluar</span>
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>

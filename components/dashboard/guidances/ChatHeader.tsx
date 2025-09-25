@@ -24,13 +24,13 @@ export default function ChatHeader({
       >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="inbox">
-            {userRole === "STUDENT" ? "Teacher" : "Students"}{" "}
+            {userRole === "STUDENT" ? "Widyaiswara" : "Peserta"}{" "}
             <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-600">
               {usersCount}
             </span>
           </TabsTrigger>
           <TabsTrigger value="explore">
-            Groups{" "}
+            Grup{" "}
             <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-600">
               {0}
             </span>

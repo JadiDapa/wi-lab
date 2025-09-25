@@ -103,7 +103,7 @@ export default function MessageList({
         return (
           <div
             key={msg.id}
-            className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+            className={`flex break-words whitespace-pre-wrap ${isOwn ? "justify-end" : "justify-start"}`}
           >
             <MessageBubble msg={msg} isOwn={isOwn} />
           </div>

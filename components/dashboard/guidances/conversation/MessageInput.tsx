@@ -117,7 +117,7 @@ export default function MessageInput({
       </div>
       <button
         onClick={handleSend}
-        className="cursor-pointer rounded-full bg-green-500 p-3 text-white shadow hover:bg-green-600"
+        className="bg-primary hover:bg-primary/80 cursor-pointer rounded-full p-3 text-white shadow"
       >
         <SendHorizonal size={18} />
       </button>
