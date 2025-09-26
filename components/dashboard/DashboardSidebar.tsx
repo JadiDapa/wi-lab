@@ -51,9 +51,9 @@ const overviewItems = [
   },
   {
     title: "Widyaiswara",
-    url: "/dashboard/students",
+    url: "/dashboard/teachers",
     icon: Users,
-    role: "lecturer",
+    role: "student",
   },
   {
     title: "Coaching Clinic",
@@ -69,13 +69,13 @@ const overviewItems = [
   },
   {
     title: "Inovasi Peserta",
-    url: "/dashboard/inbox",
+    url: "#",
     icon: Lightbulb,
     role: "all",
   },
   {
     title: "Jurnal",
-    url: "/dashboard/inbox",
+    url: "#",
     icon: ScrollText,
     role: "all",
   },
