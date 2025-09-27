@@ -36,7 +36,18 @@ export async function createUser(values: CreateUserType) {
 }
 
 export async function updateUser(id: string, values: CreateUserType) {
-  const { data } = await axiosInstance.put("/users/" + id, values);
+  const formData = new FormData();
+  formData.append("fullName", values.fullName);
+  formData.append("role", values.role);
+  formData.append("nim", values.nim || "");
+  formData.append("nip", values.nip || "");
+  formData.append("email", values.email);
+
+  if (values.avatarUrl instanceof File) {
+    formData.append("avatarUrl", values.avatarUrl); // ✅ correct key
+  }
+
+  const { data } = await axiosInstance.put(`/users/${id}`, formData);
   return data;
 }
 

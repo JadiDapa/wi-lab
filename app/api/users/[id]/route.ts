@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Role } from "@prisma/client";
+import { fileUpload } from "@/lib/file-upload";
 
 export async function GET(
   request: Request,
@@ -30,16 +32,37 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const body = await req.json();
+    const formData = await req.formData();
+
+    const email = formData.get("email") as string;
+    const fullName = formData.get("fullName") as string;
+    const role = (formData.get("role") as string) ?? null;
+    const nim = formData.get("nim") as string;
+    const nip = formData.get("nip") as string;
+    const bio = formData.get("bio") as string;
+
+    const avatarUrlFile = formData.get("avatarUrl") as File | null;
+
+    let filePath: string | null = null;
+    if (avatarUrlFile && avatarUrlFile.size > 0) {
+      const uploadedFilename = await fileUpload(avatarUrlFile, "uploads");
+      filePath = `${process.env.NEXT_PUBLIC_BASE_URL}/api/uploads/${uploadedFilename}`;
+    }
 
     const result = await prisma.user.update({
-      where: {
-        id: id,
+      where: { id },
+      data: {
+        email: email ?? "",
+        fullName: fullName ?? "",
+        role: role as Role,
+        nim: nim ?? "",
+        nip: nip ?? "",
+        bio: bio ?? "",
+        ...(filePath ? { avatarUrl: filePath } : {}), // ✅ only update if new file uploaded
       },
-      data: body,
       include: {
-        teacher: true, // ✅ return teacher if updating a student
-        students: true, // ✅ return students if updating a teacher
+        teacher: true,
+        students: true,
       },
     });
 
@@ -49,7 +72,7 @@ export async function PUT(
       console.error("Error: ", error.stack);
     }
     return NextResponse.json(
-      { message: "Something went wrong!", error },
+      { message: "Something went wrong!", error: error.message },
       { status: 500 },
     );
   }

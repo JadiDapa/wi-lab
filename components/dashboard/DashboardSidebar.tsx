@@ -84,7 +84,7 @@ const overviewItems = [
 const settingsItems = [
   {
     title: "Pengaturan",
-    url: "#",
+    url: "/dashboard/settings",
     icon: Settings,
   },
 ];
